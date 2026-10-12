@@ -1,9 +1,9 @@
 {
     "id": "datatype-gdt",
-    "name": "GDT Data Type",
+    "name": "GDT 数据类型",
     "version": "1.0.6",
     "author": "X Connections",
-    "description": "GDT data type properties - web equivalent of the GDT DataTypeClientPlugin.",
+    "description": "GDT 数据类型属性 — GDT DataTypeClientPlugin 的 Web 等效实现。",
     "oie": { "apiMin": "4.6" },
     "client": { "entry": "web/plugin.js" }
 }

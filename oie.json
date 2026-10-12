@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "id": "datatype-gdt",
-  "name": "GDT Data Type",
-  "description": "Data type for GDT (Geraete-Daten-Traeger), the QMS interface between medical devices and practice systems. Converts GDT to XML and back, calculates the line and set lengths, and can split a file with several sets.",
+  "name": "GDT 数据类型",
+  "description": "GDT（Geraete-Daten-Traeger，设备数据载体）数据类型，用于医疗设备与诊所系统之间的 QMS 接口。支持 GDT 与 XML 的双向转换，自动计算行长度和集合长度，并可拆分包含多个集合的文件。",
   "type": "datatype",
   "ui": ["web", "swing"],
   "version": "1.0.6",
