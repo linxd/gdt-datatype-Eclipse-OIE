@@ -5,7 +5,7 @@
   "description": "GDT（Geraete-Daten-Traeger，设备数据载体）数据类型，用于医疗设备与诊所系统之间的 QMS 接口。支持 GDT 与 XML 的双向转换，自动计算行长度和集合长度，并可拆分包含多个集合的文件。",
   "type": "datatype",
   "ui": ["web", "swing"],
-  "version": "1.0.6",
+  "version": "1.0.7",
   "minEngineVersion": "4.6.0",
   "maxEngineVersion": null,
   "filename": "datatype-gdt-{version}.zip",

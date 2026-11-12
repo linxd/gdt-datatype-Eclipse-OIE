@@ -7,7 +7,7 @@ const opt = (key, label, options, def, hint) => ({ key, label, type: "select", o
 const code = (key, label, def, hint) => ({ key, label, type: "code", default: def, hint });
 
 const BATCH_SCRIPT_HINT =
-  "用于拆分批处理并返回下一条报文的 JavaScript 脚本。可访问 'reader'（一个 Java BufferedReader）；返回 null 或空值表示输入结束。仅在连接器启用"处理批处理"时使用。";
+  "用于拆分批处理并返回下一条报文的 JavaScript 脚本。可访问 'reader'（一个 Java BufferedReader）；返回 null 或空值表示输入结束。仅在连接器启用“处理批处理”时使用。";
 
 const DEF = {
   name: "GDT",
@@ -52,7 +52,7 @@ const DEF = {
             { value: "JavaScript", label: "JavaScript" }
           ],
           "Set",
-          "拆分批处理报文的方法。集合：每个 GDT 集合（从字段 8000 开始）为一条报文。仅在连接器启用"处理批处理"时使用。"
+          "拆分批处理报文的方法。集合：每个 GDT 集合（从字段 8000 开始）为一条报文。仅在连接器启用“处理批处理”时使用。"
         ),
         code("batchScript", "JavaScript", null, BATCH_SCRIPT_HINT)
       ]

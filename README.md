@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/matthydehoog/gdt-datatype-Eclipse-OIE/actions/workflows/build.yml/badge.svg)](https://github.com/matthydehoog/gdt-datatype-Eclipse-OIE/actions/workflows/build.yml)
 
-一个用于 [Eclipse Open Integration Engine](https://openintegrationengine.org/) 的 **GDT 数据类型**（针对 **4.6.0** 测试），基于内置的 *EDI / X12* 数据类型建模。GDT（*Geräte-Daten-Träger*，"设备数据载体"）是 QMS（Qualitätsring Medizinische Software）在医疗测量设备（心电图仪、肺活量计、血压计等）与诊所计算机系统之间的接口。安装后，"GDT" 将出现在 Swing 客户端和 Web 管理器中 HL7 v2.x、EDI / X12 及其他数据类型旁边。
+一个用于 [Eclipse Open Integration Engine](https://openintegrationengine.org/) 的 **GDT 数据类型**（针对 **4.6.0** 和 **4.7.0** 测试），基于内置的 *EDI / X12* 数据类型建模。GDT（*Geräte-Daten-Träger*，"设备数据载体"）是 QMS（Qualitätsring Medizinische Software）在医疗测量设备（心电图仪、肺活量计、血压计等）与诊所计算机系统之间的接口。安装后，"GDT" 将出现在 Swing 客户端和 Web 管理器中 HL7 v2.x、EDI / X12 及其他数据类型旁边。
 
 > 社区扩展。它不是 Eclipse OIE 项目的组成部分，不受其认可，也不受 QMS 认可。
 
@@ -13,7 +13,7 @@
 - **行长度自动计算**：XML 写入为 GDT 时自动计算，字段 `8100`（集合长度）同样自动计算。转换器可以从零构建集合而无需手动计数字符。
 - **默认宽松解析。** 实际设备的输出超出规范允许的范围（参见[实际设备的输出](#实际设备的输出)）：错误的长度、多行的值、四位数字长度、六位数字的集合长度。所有这些都能被读取。*严格解析* 可拒绝它们。
 - 用于报文列表和搜索的**元数据**：source = 发送方 GDT-ID（`8316`），type = 集合类型（`8000`，例如 `6310`），version = GDT 版本（`9218`）。
-- 带有规范字段名称的**报文树描述**。
+- 带有规范字段名称的**报文树描述**。Swing 客户端会显示它们；Web 管理器从 Web Support 1.1.0 起也会显示。
 - **批处理**：包含多个集合的文件可拆分为每个集合一条报文。
 
 ## 安装
@@ -163,6 +163,35 @@ for each (var line in set['F6220']) {
 | 6310 | 设备 -> 诊所系统 | 检验数据传输（结果） |
 | 6311 | 诊所系统 -> 设备 | 检验数据展示 |
 
+## 不安装插件：用 JavaScript 实现 gdtToXml
+
+在无法安装扩展的环境中，[javascript/gdtToXml.js](javascript/gdtToXml.js) 可在转换器中用纯 JavaScript 读取 GDT，并生成与关闭 *字段名称* 时的数据类型相同的 XML。将该函数添加为代码模板（放在已为通道启用的库中），将源连接器的入站数据类型设为 **Raw**，并在第一个转换器步骤中这样开始：
+
+```javascript
+msg = gdtToXml(msg);
+```
+
+此后脚本与使用数据类型时相同，例如 `msg['set']['F3000']` 或 `msg['set']['categories']['category'].(@name == 'OrderID')`。分组设置作为选项通过第二个参数传入；每个省略的选项默认为**开启**：
+
+```javascript
+msg = gdtToXml(msg, {
+    groupResults: true,     // Group Result Fields
+    groupCategories: true,  // Group Categories
+    joinResultsText: false  // Join Results Text
+});
+```
+
+它读取 GDT 的方式与关闭 *严格解析* 时的数据类型相同：多行的值、错误的行长度、第一个 `8000` 之前的字段、字节顺序标记和文件结束标记。已在 [examples](examples)、三个 Noxturnal NOX T3 文件以及为边界情况制作的文件上，将选项的全部八种组合生成的 XML 与数据类型的输出进行了比较：结果一致。
+
+它不做的事情：
+
+- 写入 GDT。仅支持读取。
+- *严格解析* 和 *字段名称*。
+- 对四位数字长度使用字段表。998 个字符或更长的行按四位数字长度读取；数据类型还会检查哪种读法能得到已知字段，因此只有长度错误的长行才可能产生不同结果。
+- 解码字节：与数据类型一样，将 File Reader 的编码设置为与字段 `9206` 匹配（Noxturnal 写入 `2`，即 `IBM437`）。
+
+在 Rhino 中，`appendChild` 添加的是元素的副本，因此该函数始终使用文档中的子元素继续处理。修改时请牢记这一点。
+
 ## 字符集
 
 字段 `9206` 指明文件编码方式：`1` = 7 位，`2` = IBM 代码页 437（规范默认），`3` = ISO 8859-1（ANSI，代码页 1252）。数据类型不解码字节；由**连接器**负责。将 File Reader（和 File Writer）的编码设置为匹配，例如 `IBM437` 或 `ISO-8859-1`。编码错误时，变音符号和重音符号会显示错误。
@@ -195,7 +224,7 @@ for each (var line in set['F6220']) {
 
 ### GitHub 上
 
-每次推送和拉取请求都由 [GitHub Actions](.github/workflows/build.yml) 构建和测试。引擎 jar 取自[引擎自身的发布版](https://github.com/OpenIntegrationEngine/engine/releases)（经 SHA-256 校验）并缓存；每次构建的 zip 作为 artifact 保留。
+每次推送和拉取请求都由 [GitHub Actions](.github/workflows/build.yml) 针对 OIE 4.6.0（Java 17）和 4.7.0（Java 17 和 21）构建和测试。随后将 zip 安装到这两个版本的真实引擎中，部署一个通道并对 GDT 报文进行转换和拆分（即冒烟测试，参见[开发指南](docs/development.md#smoke-test)）。引擎 jar 取自[引擎自身的发布版](https://github.com/OpenIntegrationEngine/engine/releases)（经其公布的 SHA-256 校验）并缓存；每次构建的 zip 作为 artifact 保留。
 
 ### 发布
 
@@ -203,8 +232,8 @@ for each (var line in set['F6220']) {
 2. 提交，然后标记并推送标签：
 
    ```bash
-   git tag v1.0.6
-   git push origin v1.0.6
+   git tag v1.0.7
+   git push origin v1.0.7
    ```
 
 工作流构建标签并创建包含 zip 及其 SHA-256 的 GitHub Release。要自行编写发布说明，请先在 GitHub 上创建 Release（不带 zip）；工作流只会添加 zip 和校验和。
